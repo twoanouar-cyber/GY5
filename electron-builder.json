@@ -1,0 +1,77 @@
+{
+  "appId": "com.gymdada.management",
+  "productName": "نظام إدارة الصالة الرياضية - GYM DADA",
+  "directories": {
+    "output": "dist-electron",
+    "buildResources": "build-resources"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "data/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "data/",
+      "to": "data/",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "docs/",
+      "to": "docs/",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "build-resources/icon.ico",
+    "requestedExecutionLevel": "asInvoker",
+    "artifactName": "${productName}-${version}-Setup.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowElevation": true,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "نظام إدارة الصالة الرياضية",
+    "installerIcon": "build-resources/icon.ico",
+    "uninstallerIcon": "build-resources/icon.ico",
+    "installerHeaderIcon": "build-resources/icon.ico",
+    "deleteAppDataOnUninstall": false,
+    "runAfterFinish": true,
+    "menuCategory": "نظام إدارة الصالة الرياضية",
+    "warningsAsErrors": false,
+    "displayLanguageSelector": false,
+    "language": "Arabic"
+  },
+  "mac": {
+    "category": "public.app-category.business",
+    "target": {
+      "target": "dmg",
+      "arch": ["x64", "arm64"]
+    },
+    "icon": "build-resources/icon.icns"
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      }
+    ],
+    "category": "Office",
+    "icon": "build-resources/icon.png"
+  },
+  "publish": null,
+  "compression": "maximum",
+  "buildDependenciesFromSource": false,
+  "nodeGypRebuild": false
+}
