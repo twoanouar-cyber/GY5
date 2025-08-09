@@ -130,6 +130,28 @@ const QuickSaleModal: React.FC<QuickSaleModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const addProductManually = (product: Product) => {
+    const existingItemIndex = items.findIndex(item => item.product_id === product.id);
+    
+    if (existingItemIndex >= 0) {
+      // Increase quantity if product already exists
+      const newItems = [...items];
+      newItems[existingItemIndex].quantity += 1;
+      newItems[existingItemIndex].total_price = newItems[existingItemIndex].quantity * newItems[existingItemIndex].unit_price;
+      setItems(newItems);
+    } else {
+      // Add new item
+      const newItem: QuickSaleItem = {
+        product_id: product.id,
+        product_name: product.name,
+        quantity: 1,
+        unit_price: product.sale_price,
+        total_price: product.sale_price
+      };
+      setItems([...items, newItem]);
+    }
+  };
+
   const loadCustomers = async () => {
     try {
       const data = await window.electronAPI.query(`
@@ -393,6 +415,32 @@ const QuickSaleModal: React.FC<QuickSaleModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </div>
+
+            {/* Manual Product Selection */}
+            {!isSingleSession && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3 arabic-text">اختيار المنتجات يدوياً</h3>
+                <div className="max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                  <div className="grid grid-cols-1 gap-2">
+                    {products.map((product) => (
+                      <button
+                        key={product.id}
+                        onClick={() => addProductManually(product)}
+                        className="flex items-center justify-between p-2 bg-white rounded border hover:bg-blue-50 transition-colors text-right"
+                      >
+                        <div className="flex-1">
+                          <div className="font-medium arabic-text">{product.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {formatCurrency(product.sale_price)}
+                          </div>
+                        </div>
+                        <div className="text-blue-600 font-bold">+</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Items List */}
             {!isSingleSession && (

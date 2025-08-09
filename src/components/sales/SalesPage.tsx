@@ -529,6 +529,42 @@ const SalesPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Manual Product Selection */}
+              {!formData.is_single_session && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3 arabic-text">اختيار المنتجات يدوياً</h3>
+                  <div className="max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                    <div className="grid grid-cols-1 gap-2">
+                      {products.map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => {
+                            const newItem = {
+                              product_id: product.id,
+                              product_name: product.name,
+                              quantity: 1,
+                              unit_price: product.sale_price,
+                              total_price: product.sale_price
+                            };
+                            setFormData({ ...formData, items: [...formData.items, newItem] });
+                          }}
+                          className="flex items-center justify-between p-2 bg-white rounded border hover:bg-blue-50 transition-colors text-right"
+                        >
+                          <div className="flex-1">
+                            <div className="font-medium arabic-text">{product.name}</div>
+                            <div className="text-sm text-gray-600">
+                              {formatCurrency(product.sale_price)}
+                            </div>
+                          </div>
+                          <div className="text-blue-600 font-bold">+</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Items */}
               {!formData.is_single_session && (
               <div>

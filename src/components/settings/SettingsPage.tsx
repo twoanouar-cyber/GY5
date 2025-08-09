@@ -107,6 +107,8 @@ const SettingsPage: React.FC = () => {
   const [backupStatus, setBackupStatus] = useState<{ type: 'success' | 'error' | 'info' | null; message: string | null }>({ type: null, message: null });
   const [isBackupLoading, setIsBackupLoading] = useState(false);
 
+  const [isClearing, setIsClearing] = useState(false);
+
   const createBackup = async () => {
     try {
       setIsBackupLoading(true);
@@ -215,6 +217,65 @@ const SettingsPage: React.FC = () => {
       setBackupStatus({ type: 'error', message: `حدث خطأ غير متوقع: ${error.message}` });
     } finally {
       setIsBackupLoading(false);
+    }
+  };
+
+  const clearAllData = async () => {
+    try {
+      // تأكيد مضاعف قبل الحذف
+      const firstConfirm = await window.electronAPI.showConfirm({
+        title: 'تحذير: حذف جميع البيانات',
+        message: 'هل أنت متأكد من حذف جميع البيانات؟',
+        detail: 'سيتم حذف جميع البيانات باستثناء حسابات المستخدمين. هذا الإجراء لا يمكن التراجع عنه!',
+        buttons: ['نعم، احذف جميع البيانات', 'إلغاء'],
+        defaultId: 1,
+        cancelId: 1
+      });
+
+      if (firstConfirm.response === 1) {
+        return; // تم الإلغاء
+      }
+
+      const secondConfirm = await window.electronAPI.showConfirm({
+        title: 'تأكيد نهائي',
+        message: 'هذا هو التأكيد الأخير!',
+        detail: 'سيتم حذف جميع المنتجات، المبيعات، المشتركين، والفواتير نهائياً. هل تريد المتابعة؟',
+        buttons: ['نعم، احذف نهائياً', 'إلغاء'],
+        defaultId: 1,
+        cancelId: 1
+      });
+
+      if (secondConfirm.response === 1) {
+        return; // تم الإلغاء
+      }
+
+      setIsClearing(true);
+      setBackupStatus({ type: 'info', message: 'جاري حذف البيانات...' });
+
+      // حذف البيانات بالترتيب الصحيح (بسبب المفاتيح الخارجية)
+      const tablesToClear = [
+        'invoice_items',
+        'invoices', 
+        'purchase_items',
+        'purchases',
+        'internal_sales',
+        'subscribers',
+        'subscription_types',
+        'products',
+        'categories',
+        'customers'
+      ];
+
+      for (const table of tablesToClear) {
+        await window.electronAPI.run(`DELETE FROM ${table}`);
+      }
+
+      setBackupStatus({ type: 'success', message: 'تم حذف جميع البيانات بنجاح! يمكنك الآن البدء من جديد.' });
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      setBackupStatus({ type: 'error', message: `حدث خطأ في حذف البيانات: ${error.message}` });
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -509,6 +570,20 @@ const SettingsPage: React.FC = () => {
                   >
                     <Settings className="ml-2" size={18} />
                     إصلاح وتحسين قاعدة البيانات
+                  </button>
+                </div>
+                
+                <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <h3 className="font-semibold mb-2 text-red-800 arabic-text">منطقة الخطر</h3>
+                  <p className="text-sm text-red-600 mb-3 arabic-text">
+                    حذف جميع البيانات باستثناء حسابات المستخدمين
+                  </p>
+                  <button
+                    onClick={clearAllData}
+                    disabled={isClearing}
+                    className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors disabled:bg-gray-400 arabic-text"
+                  >
+                    {isClearing ? 'جاري الحذف...' : 'حذف جميع البيانات'}
                   </button>
                 </div>
 

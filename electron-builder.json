@@ -1,5 +1,5 @@
 {
-  "appId": "com.gymdada.management",
+  "appId": "com.gymdada.management.app",
   "productName": "نظام إدارة الصالة الرياضية - GYM DADA",
   "directories": {
     "output": "dist-electron",
@@ -8,15 +8,16 @@
   "files": [
     "dist/**/*",
     "electron/**/*",
-    "data/**/*",
+    "!data/**/*",
     "node_modules/**/*",
-    "package.json"
+    "package.json",
+    "!node_modules/.cache/**/*"
   ],
   "extraResources": [
     {
-      "from": "data/",
+      "from": "electron/",
       "to": "data/",
-      "filter": ["**/*"]
+      "filter": ["database.cjs"]
     },
     {
       "from": "docs/",
@@ -33,7 +34,8 @@
     ],
     "icon": "build-resources/icon.ico",
     "requestedExecutionLevel": "asInvoker",
-    "artifactName": "${productName}-${version}-Setup.${ext}"
+    "artifactName": "${productName}-${version}-Setup.${ext}",
+    "publisherName": "GYM DADA Management"
   },
   "nsis": {
     "oneClick": false,
@@ -48,7 +50,8 @@
     "deleteAppDataOnUninstall": false,
     "runAfterFinish": true,
     "menuCategory": "نظام إدارة الصالة الرياضية",
-    "warningsAsErrors": false,
+    "include": "installer.nsh",
+    "perMachine": false,
     "displayLanguageSelector": false,
     "language": "Arabic"
   },

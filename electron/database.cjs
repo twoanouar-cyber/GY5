@@ -5,7 +5,15 @@ const bcrypt = require('bcryptjs');
 
 class DatabaseService {
   constructor() {
-    const dbPath = path.join(__dirname, '../data/gym.db');
+    let dbPath;
+    if (process.env.NODE_ENV === 'development' || !require('electron').app.isPackaged) {
+      // في التطوير
+      dbPath = path.join(__dirname, '../data/gym.db');
+    } else {
+      // في التطبيق المثبت
+      const { app } = require('electron');
+      dbPath = path.join(app.getPath('userData'), 'data', 'gym.db');
+    }
     
     // Ensure data directory exists
     const dataDir = path.dirname(dbPath);
@@ -13,6 +21,8 @@ class DatabaseService {
       fs.mkdirSync(dataDir, { recursive: true });
     }
 
+    console.log('Database path:', dbPath);
+    
     this.db = new sqlite3.Database(dbPath);
     this.db.serialize(() => {
     this.initializeTables();
@@ -297,19 +307,19 @@ async seedInitialData() {
           console.log(`✅ تم إنشاء نادي السيدات (ID: ${femaleGymId})`);
 
           // إنشاء حسابات المدراء
-          bcrypt.hash('admin123', 10).then(defaultPassword => {
+          bcrypt.hash('admin123', 10).then(hashedPassword => {
             console.log("🔐 كلمة المرور الافتراضية مشفرة بنجاح");
 
             this.db.run(`
               INSERT INTO users (username, password_hash, full_name, gym_id) VALUES (?, ?, ?, ?)
-            `, ['admin_male', defaultPassword, 'مدير نادي الرجال', maleGymId], (err) => {
+            `, ['admin_male', hashedPassword, 'مدير نادي الرجال', maleGymId], (err) => {
               if (err) console.error("❌ خطأ في إنشاء مدير نادي الرجال:", err);
               else console.log("✅ تم إنشاء مدير نادي الرجال");
-            });
+            }, [hashedPassword, 'مدير نادي الرجال', maleGymId], (err) => {
 
             this.db.run(`
               INSERT INTO users (username, password_hash, full_name, gym_id) VALUES (?, ?, ?, ?)
-            `, ['admin_female', defaultPassword, 'مديرة نادي السيدات', femaleGymId], (err) => {
+            `, ['admin_female', hashedPassword, 'مديرة نادي السيدات', femaleGymId], (err) => {
               if (err) console.error("❌ خطأ في إنشاء مديرة نادي السيدات:", err);
               else console.log("✅ تم إنشاء مديرة نادي السيدات");
             });

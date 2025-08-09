@@ -31,6 +31,7 @@ const ProductsPage: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
+    barcodeInput: '',
     barcode: '',
     name: '',
     category_id: '',
@@ -39,6 +40,31 @@ const ProductsPage: React.FC = () => {
     quantity: '',
     notes: ''
   });
+
+  // Barcode scanning effect
+  useEffect(() => {
+    if (formData.barcodeInput && showModal) {
+      // Auto-generate barcode or use scanned one
+      setFormData(prev => ({
+        ...prev,
+        barcode: prev.barcodeInput,
+        barcodeInput: ''
+      }));
+    }
+  }, [formData.barcodeInput, showModal]);
+
+  // Global keyboard listener for barcode scanning in modal
+  useEffect(() => {
+    if (!showModal) return;
+
+    // Focus barcode input when modal opens
+    setTimeout(() => {
+      const barcodeInputElement = document.getElementById('product-barcode-input');
+      if (barcodeInputElement) {
+        barcodeInputElement.focus();
+      }
+    }, 100);
+  }, [showModal]);
 
   useEffect(() => {
     loadProducts();
@@ -166,6 +192,7 @@ const ProductsPage: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
+      barcodeInput: '',
       barcode: '',
       name: '',
       category_id: '',
@@ -331,29 +358,50 @@ const ProductsPage: React.FC = () => {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Barcode Scanner Input */}
+                <div className="form-group-ar">
+                  <label className="form-label-ar arabic-text">
+                    مسح الباركود
+                  </label>
+                  <input
+                    id="product-barcode-input"
+                    type="text"
+                    value={formData.barcodeInput}
+                    onChange={(e) => setFormData({ ...formData, barcodeInput: e.target.value })}
+                    className="form-input-ar text-center text-lg font-mono"
+                    placeholder="امسح الباركود هنا..."
+                    autoFocus
+                  />
+                </div>
+
                 <div className="form-group-ar">
                   <label className="form-label-ar arabic-text">
                     الباركود
                   </label>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      value={formData.barcode}
-                      onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                      className="form-input-ar flex-1"
-                      placeholder="سيتم إنشاؤه تلقائياً"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, barcode: generateBarcode() })}
-                      className="btn-secondary-ar mr-2"
-                    >
-                      إنشاء
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    value={formData.barcode}
+                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                    className="form-input-ar"
+                    placeholder="سيتم إنشاؤه من المسح أو يدوياً"
+                    readOnly={!!formData.barcodeInput}
+                  />
                 </div>
+              </div>
 
-                <div className="form-group-ar">
+              <div className="form-group-ar">
+                <label className="form-label-ar arabic-text">
+                  اسم المنتج *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="form-input-ar"
+                  placeholder="أدخل اسم المنتج"
+                  required
+                />
+              </div>
                   <label className="form-label-ar arabic-text">
                     اسم المنتج *
                   </label>

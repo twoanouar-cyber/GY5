@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { User, Lock, Dumbbell } from 'lucide-react';
@@ -42,10 +41,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // تم إزالة وظائف التصحيح غير المطلوبة
-  // تم تحديث كلمات المرور في قاعدة البيانات
-  // تم إزالة التشفير من كلمات المرور للتجربة - الآن كلمة المرور هي نص عادي غير مشفر
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -61,6 +56,12 @@ const LoginPage: React.FC = () => {
             <p className="text-gray-600 mt-2 arabic-text">
               مرحباً بك، يرجى تسجيل الدخول للمتابعة
             </p>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
+              <p className="text-blue-800 arabic-text font-medium">معلومات تسجيل الدخول:</p>
+              <p className="text-blue-700 arabic-text">نادي الرجال: admin_male</p>
+              <p className="text-blue-700 arabic-text">نادي السيدات: admin_female</p>
+              <p className="text-blue-700 arabic-text">كلمة المرور: admin123</p>
+            </div>
           </div>
 
           {/* Login Form */}

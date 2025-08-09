@@ -1,13 +1,22 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { DatabaseService } = require('./database.cjs');
 
 let mainWindow;
 let isDev;
 
 // تأكد من وجود مجلد البيانات
 const ensureDataDirectory = () => {
-  const dataDir = path.join(app.getPath('userData'), 'data');
+  let dataDir;
+  if (app.isPackaged) {
+    // في التطبيق المثبت، استخدم مجلد userData
+    dataDir = path.join(app.getPath('userData'), 'data');
+  } else {
+    // في التطوير، استخدم مجلد data في المشروع
+    dataDir = path.join(__dirname, '../data');
+  }
+  
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
@@ -23,12 +32,29 @@ const ensureBackupDirectory = () => {
   return backupDir;
 };
 
+// إعداد قاعدة البيانات للتطبيق المثبت
+const setupDatabase = () => {
+  if (app.isPackaged) {
+    const dataDir = ensureDataDirectory();
+    const dbPath = path.join(dataDir, 'gym.db');
+    
+    // إذا لم تكن قاعدة البيانات موجودة، أنشئها
+    if (!fs.existsSync(dbPath)) {
+      console.log('Creating new database for packaged app...');
+      // سيتم إنشاء قاعدة البيانات تلقائياً عند أول استخدام
+    }
+  }
+};
+
 function createWindow() {
   isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   
   // تأكد من وجود المجلدات الضرورية
   ensureDataDirectory();
   ensureBackupDirectory();
+  
+  // إعداد قاعدة البيانات
+  setupDatabase();
   
   mainWindow = new BrowserWindow({
     width: 1400,
@@ -58,6 +84,11 @@ function createWindow() {
 mainWindow.once('ready-to-show', () => {
   mainWindow.show();
   mainWindow.focus();
+  
+  // تأكد من تهيئة قاعدة البيانات
+  setTimeout(() => {
+    console.log('Database should be initialized now');
+  }, 1000);
 });
 
 
@@ -286,7 +317,7 @@ app.on('activate', () => {
 // IPC handlers for database operations
 ipcMain.handle('database-query', async (event, query, params) => {
   try {
-    const { DatabaseService } = require('./database.cjs');
+    // DatabaseService is already imported at the top
     const result = await DatabaseService.query(query, params);
     return result;
   } catch (error) {
@@ -297,7 +328,7 @@ ipcMain.handle('database-query', async (event, query, params) => {
 
 ipcMain.handle('database-run', async (event, query, params) => {
   try {
-    const { DatabaseService } = require('./database.cjs');
+    // DatabaseService is already imported at the top
     const result = await DatabaseService.run(query, params);
     return result;
   } catch (error) {
